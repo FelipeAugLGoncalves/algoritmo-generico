@@ -1,5 +1,5 @@
 # Felipe Augusto - Nicolas Povoa
-# Algoritmo Genético com Análise de Desempenho
+# Algoritmo Genético com Análise de Desempenho (versão aprimorada)
 
 import random
 import matplotlib.pyplot as plt
@@ -26,7 +26,8 @@ def generate_population(size, length):
     return [[random.randint(0, 1) for _ in range(length)] for _ in range(size)]
 
 def crossover(parent1, parent2):
-    point = len(parent1) // 2
+    point = random.randint(1, len(parent1)-1)  # Corte aleatório
+    print(f"Corte de cruzamento em: {point}")
     child1 = parent1[:point] + parent2[point:]
     child2 = parent2[:point] + parent1[point:]
     return child1, child2
@@ -47,7 +48,7 @@ def reaper(population, num_to_remove, y_history):
     return population
 
 def mostrar_info_computador():
-    print("\n🔧 CONFIGURAÇÃO DO COMPUTADOR:")
+    print("\n CONFIGURAÇÃO DO COMPUTADOR:")
     print(f"Sistema Operacional: {platform.system()} {platform.release()}")
     print(f"Processador: {platform.processor()}")
     print(f"Núcleos (físicos/lógicos): {psutil.cpu_count(logical=False)} / {psutil.cpu_count(logical=True)}")
@@ -55,10 +56,20 @@ def mostrar_info_computador():
 
 def plotar_grafico_y(y_values):
     plt.figure(figsize=(10, 5))
-    plt.plot(y_values, marker='o', linestyle='--', color='blue')
+    plt.plot(y_values, marker='o', linestyle='--', color='blue', label='Valores de y')
+    
+    max_y = max(y_values)
+    min_y = min(y_values)
+    max_idx = y_values.index(max_y)
+    min_idx = y_values.index(min_y)
+
+    plt.plot(max_idx, max_y, 'ro', label=f'Máximo y = {max_y:.2f}')
+    plt.plot(min_idx, min_y, 'go', label=f'Mínimo y = {min_y:.2f}')
+
     plt.title('Valores de y dos Indivíduos ao Longo da Execução')
     plt.xlabel('Avaliações')
     plt.ylabel('Valor de y')
+    plt.legend()
     plt.grid(True)
     plt.show()
 
@@ -84,7 +95,7 @@ def main():
     mostrar_info_computador()
 
     population = generate_population(population_size, chromosome_length)
-    print("\n📌 População Inicial:")
+    print("\n População Inicial:")
     for individual in population:
         y = avaliar_individuo(individual)
         y_history.append(y)
@@ -94,7 +105,7 @@ def main():
         cpu_usage.append(psutil.cpu_percent(interval=0.5))
         ram_usage.append(psutil.virtual_memory().percent)
 
-        print(f"\n🔁 Cruzamento {i+1}:")
+        print(f"\n Cruzamento {i+1}:")
         parent1, parent2 = random.sample(population, 2)
         print("Pai:")
         avaliar_individuo(parent1)
@@ -107,15 +118,15 @@ def main():
         y_history.append(avaliar_individuo(child2))
         population.extend([child1, child2])
 
-    print("\n☠️ Aplicando Ceifador...")
+    print("\n Aplicando Ceifador...")
     population = reaper(population, num_to_remove=2, y_history=y_history)
 
-    print("\n🏁 População Final:")
+    print("\n População Final:")
     for idx, individual in enumerate(population):
         print(f"\nIndivíduo {idx+1}:")
         y_history.append(avaliar_individuo(individual))
 
-    print("\n📊 Estatísticas:")
+    print("\n Estatísticas:")
     print(f"Quantidade de cruzamentos: {num_cruzamentos}")
     print(f"População inicial: {population_size}")
     print(f"População final: {len(population)}")
@@ -126,8 +137,6 @@ def main():
     plotar_desempenho(cpu_usage, ram_usage)
 
 if __name__ == "__main__":
-    exemplo = [0, 0, 0, 1, 1, 0, 1, 1]
-    print("🧪 Avaliação de Exemplo:")
-    avaliar_individuo(exemplo)
-    print("\n🚀 Iniciando Algoritmo Genético:\n")
+    print("\n Iniciando Algoritmo Genético:\n")
     main()
+
